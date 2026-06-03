@@ -20,7 +20,6 @@ import streamlit as st
 
 st.set_page_config(
     page_title="ETL ",
-    page_icon="🧩",
     layout="wide"
 )
 
@@ -315,41 +314,26 @@ def procesar_comunas(lista_comunas, formato):
 def vista_comunas():
     st.header("I. Normalización y consolidación de comunas")
     st.write(
-        "Carga un archivo con comunas o ingresa una comuna/listado manualmente. "
+        "Carga un archivo con comunas. "
         "La app normaliza nombres, elimina duplicados, consulta Chile Abierto y genera auditoría."
     )
 
-    formato = st.selectbox(
-        "Formato de normalización",
-        ["Título", "MAYÚSCULAS", "minúsculas"]
+    formato = "Título"
+
+    archivo = st.file_uploader(
+        "Cargar archivo de comunas TXT o CSV",
+        type=["txt", "TXT", "csv", "CSV"],
+        key="archivo_comunas"
     )
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        archivo = st.file_uploader(
-            "Cargar archivo de comunas TXT o CSV",
-            type=["txt", "TXT", "csv", "CSV"],
-            key="archivo_comunas"
-        )
-
-    with col2:
-        comunas_manual = st.text_area(
-            "Busca o ingresa comunas manualmente, una por línea",
-            placeholder="florida\nConcepción\nSan Pedro de la Paz"
-        )
 
     lista_comunas = []
 
     if archivo is not None:
         lista_comunas.extend(extraer_comunas_desde_archivo(archivo))
 
-    if comunas_manual.strip():
-        lista_comunas.extend(comunas_manual.splitlines())
-
     if st.button("Procesar comunas"):
         if not lista_comunas:
-            st.warning("Debes cargar un archivo o ingresar al menos una comuna.")
+            st.warning("Debes cargar un archivo con al menos una comuna.")
             return
 
         try:
@@ -948,9 +932,9 @@ def vista_lugares():
 # NAVEGACIÓN PRINCIPAL
 # ============================================================
 
-st.sidebar.title("ETL Final")
+st.sidebar.title("Procesamiento de datos")
 modulo = st.sidebar.radio(
-    "Selecciona una sección",
+    "Módulo",
     [
         "I. Comunas",
         "II. Famosos con imagen",
@@ -959,12 +943,8 @@ modulo = st.sidebar.radio(
 )
 
 st.sidebar.markdown("---")
-st.sidebar.info(
-    "Aplicación preparada para Streamlit Cloud. "
-    "Permite cargar archivos, procesar, visualizar y descargar CSV/SQLite."
-)
 
-st.title("Aplicación ETL Final - Arquitectura y Almacenamiento de Datos")
+st.title("Aplicación de procesamiento de datos")
 
 if modulo == "I. Comunas":
     vista_comunas()
