@@ -369,6 +369,10 @@ def vista_comunas():
             st.subheader("Auditoría del proceso")
             st.dataframe(auditoria, use_container_width=True)
 
+            duplicados_eliminados = int(auditoria.loc[0, "duplicados_eliminados"])
+            if duplicados_eliminados > 0:
+                st.info(f"Duplicados eliminados del listado de entrada: {duplicados_eliminados}")
+
             if not df_no_encontrados.empty:
                 st.subheader("No encontradas / revisar opciones")
                 st.dataframe(df_no_encontrados, use_container_width=True)
