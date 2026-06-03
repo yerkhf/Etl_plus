@@ -287,7 +287,20 @@ def procesar_comunas(lista_comunas, formato):
                 "error": str(error)
             })
 
-    df_consolidados = pd.DataFrame(consolidados)
+    df_consolidados = pd.DataFrame(
+        consolidados,
+        columns=[
+            "codigo_comuna",
+            "nombre_comuna",
+            "region",
+            "habitantes",
+            "latitud",
+            "longitud",
+            "fuente",
+            "fuente_url",
+            "fecha_captura"
+        ]
+    )
 
     if not df_consolidados.empty:
         df_consolidados = df_consolidados.drop_duplicates(
@@ -295,8 +308,14 @@ def procesar_comunas(lista_comunas, formato):
             keep="last"
         ).reset_index(drop=True)
 
-    df_no_encontrados = pd.DataFrame(no_encontrados)
-    df_errores = pd.DataFrame(errores)
+    df_no_encontrados = pd.DataFrame(
+        no_encontrados,
+        columns=["comuna_ingresada", "comuna_normalizada", "opciones"]
+    )
+    df_errores = pd.DataFrame(
+        errores,
+        columns=["comuna", "error"]
+    )
 
     auditoria = pd.DataFrame([{
         "fecha_hora_ejecucion": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -649,7 +668,7 @@ def vista_famosos():
                     st.image(
                         imagen_data["imagen_url"],
                         caption=f"Imagen de {seleccionado}",
-                        use_container_width=True
+                        width=320
                     )
 
         if imagenes_cache:
@@ -862,12 +881,29 @@ def vista_lugares():
         st.subheader("Mapa mundial de lugares cargados")
 
         mapa_df = df_limpio.rename(columns={"latitud": "lat", "longitud": "lon"})
+        mapa_seleccionado_df = pd.DataFrame([{
+            "nombre_lugar": fila["nombre_lugar"],
+            "direccion_completa": fila["direccion_completa"],
+            "lat": fila["latitud"],
+            "lon": fila["longitud"]
+        }])
 
-        capa = pdk.Layer(
+        capa_lugares = pdk.Layer(
             "ScatterplotLayer",
             data=mapa_df,
             get_position="[lon, lat]",
-            get_radius=70000,
+            get_radius=2500,
+            get_fill_color=[50, 120, 190, 150],
+            pickable=True,
+            opacity=0.7
+        )
+
+        capa_seleccionado = pdk.Layer(
+            "ScatterplotLayer",
+            data=mapa_seleccionado_df,
+            get_position="[lon, lat]",
+            get_radius=9000,
+            get_fill_color=[230, 70, 70, 220],
             pickable=True,
             opacity=0.7
         )
@@ -886,7 +922,7 @@ def vista_lugares():
 
         st.pydeck_chart(
             pdk.Deck(
-                layers=[capa],
+                layers=[capa_lugares, capa_seleccionado],
                 initial_view_state=vista,
                 tooltip=tooltip
             )
