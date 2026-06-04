@@ -267,7 +267,7 @@ def procesar_comunas(lista_comunas, formato):
             if encontrado:
                 consolidados.append({
                     "codigo_comuna": encontrado.get("code"),
-                    "nombre_comuna": encontrado.get("name"),
+                    "nombre_comuna": aplicar_formato(encontrado.get("name"), formato),
                     "region": encontrado.get("region_name"),
                     "habitantes": encontrado.get("population"),
                     "latitud": encontrado.get("lat"),
@@ -280,7 +280,9 @@ def procesar_comunas(lista_comunas, formato):
                 no_encontrados.append({
                     "comuna_ingresada": entrada["comuna_original"],
                     "comuna_normalizada": entrada["comuna_normalizada"],
-                    "opciones": ", ".join([s.get("name", "") for s in sugerencias]) if sugerencias else "Sin sugerencias"
+                    "opciones": ", ".join(
+                        [aplicar_formato(s.get("name", ""), formato) for s in sugerencias]
+                    ) if sugerencias else "Sin sugerencias"
                 })
 
         except Exception as error:
