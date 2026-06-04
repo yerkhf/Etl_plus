@@ -60,6 +60,8 @@ def aplicar_formato(texto, formato):
     """Aplica el formato elegido por el usuario."""
     texto = normalizar_texto_base(texto)
 
+    if formato == "Normalizado total":
+        return quitar_tildes(texto).title()
     if formato == "MAYÚSCULAS":
         return texto.upper()
     if formato == "minúsculas":
@@ -333,7 +335,10 @@ def procesar_comunas(lista_comunas, formato):
 def vista_comunas():
     st.header("I. Normalización y consolidación de comunas")
 
-    formato = "Título"
+    formato = st.selectbox(
+        "Formato de normalización",
+        ["Título", "MAYÚSCULAS", "minúsculas", "Normalizado total"]
+    )
 
     archivo = st.file_uploader(
         "Cargar archivo de comunas TXT o CSV",
@@ -962,9 +967,9 @@ st.sidebar.title("Procesamiento de datos")
 modulo = st.sidebar.radio(
     "Módulo",
     [
-        "I. Comunas",
-        "II. Famosos con imagen",
-        "III. Lugares históricos"
+        "Comunas",
+        "Famosos con imagen",
+        "Lugares históricos"
     ]
 )
 
@@ -972,9 +977,9 @@ st.sidebar.markdown("---")
 
 st.title("Aplicación de procesamiento de datos")
 
-if modulo == "I. Comunas":
+if modulo == "Comunas":
     vista_comunas()
-elif modulo == "II. Famosos con imagen":
+elif modulo == "Famosos con imagen":
     vista_famosos()
 else:
     vista_lugares()
