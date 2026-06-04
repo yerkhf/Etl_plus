@@ -332,10 +332,6 @@ def procesar_comunas(lista_comunas, formato):
 
 def vista_comunas():
     st.header("I. Normalización y consolidación de comunas")
-    st.write(
-        "Carga un archivo con comunas. "
-        "La app normaliza nombres, elimina duplicados, consulta Chile Abierto y genera auditoría."
-    )
 
     formato = "Título"
 
@@ -356,22 +352,19 @@ def vista_comunas():
             return
 
         try:
+            st.toast("Procesando comunas...")
             df_consolidados, df_no_encontrados, df_errores, auditoria = procesar_comunas(
                 lista_comunas,
                 formato
             )
 
-            st.success("Proceso de comunas finalizado.")
+            st.toast("Proceso de comunas finalizado.")
 
             st.subheader("Comunas consolidadas")
             st.dataframe(df_consolidados, use_container_width=True)
 
             st.subheader("Auditoría del proceso")
             st.dataframe(auditoria, use_container_width=True)
-
-            duplicados_eliminados = int(auditoria.loc[0, "duplicados_eliminados"])
-            if duplicados_eliminados > 0:
-                st.info(f"Duplicados eliminados del listado de entrada: {duplicados_eliminados}")
 
             if not df_no_encontrados.empty:
                 st.subheader("No encontradas / revisar opciones")
@@ -612,10 +605,6 @@ def buscar_imagen_wikidata(nombre):
 
 def vista_famosos():
     st.header("II. Famosos, edad e imagen desde API")
-    st.write(
-        "Carga el archivo de famosos. La app calcula edad, normaliza fechas y permite ver una imagen "
-        "del famoso seleccionado usando Wikidata/Wikimedia Commons."
-    )
 
     archivo = st.file_uploader(
         "Cargar archivo TXT de famosos",
@@ -625,16 +614,17 @@ def vista_famosos():
 
     if archivo is not None:
         if st.button("Procesar famosos"):
+            st.toast("Procesando famosos...")
             df, df_descartados = procesar_famosos(archivo)
             st.session_state["df_famosos"] = df
             st.session_state["df_famosos_descartados"] = df_descartados
             st.session_state["imagenes_famosos_cache"] = {}
             st.session_state.pop("imagen_famoso", None)
+            st.toast("Proceso de famosos finalizado.")
 
     df = st.session_state.get("df_famosos")
 
     if isinstance(df, pd.DataFrame) and not df.empty:
-        st.success(f"Famosos procesados correctamente: {len(df)}")
         st.dataframe(df, use_container_width=True)
 
         seleccionado = st.selectbox(
@@ -842,10 +832,6 @@ def crear_tablas_lugares(df_limpio):
 
 def vista_lugares():
     st.header("III. Lugares históricos en mapa mundial")
-    st.write(
-        "Carga el dataset de lugares. La app normaliza los datos, genera las tres tablas y muestra "
-        "todos los puntos en un mapa mundial."
-    )
 
     archivo = st.file_uploader(
         "Cargar archivo TXT o CSV de lugares",
@@ -856,9 +842,11 @@ def vista_lugares():
     if archivo is not None:
         if st.button("Procesar lugares"):
             try:
+                st.toast("Procesando lugares...")
                 df_limpio, df_descartados = procesar_lugares(archivo)
                 st.session_state["df_lugares_limpio"] = df_limpio
                 st.session_state["df_lugares_descartados"] = df_descartados
+                st.toast("Proceso de lugares finalizado.")
             except ValueError as error:
                 st.session_state.pop("df_lugares_limpio", None)
                 st.session_state.pop("df_lugares_descartados", None)
@@ -872,8 +860,6 @@ def vista_lugares():
 
     if isinstance(df_limpio, pd.DataFrame) and not df_limpio.empty:
         df_lugares, df_direcciones, df_georeferencias = crear_tablas_lugares(df_limpio)
-
-        st.success(f"Lugares normalizados correctamente: {len(df_lugares)}")
 
         seleccionado = st.selectbox(
             "Selecciona un lugar para llegar a él",
